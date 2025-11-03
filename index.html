@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyclist Smartwatch Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Poppins:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --glow: #00ffe0;
+  --accent-blue: #1E90FF;
+  --accent-green: #32CD32;
+  --bg-dark: #0e0e0e;
+  --text-light: #f4f4f4;
+  --glass-bg: rgba(255,255,255,0.05);
+  --glass-blur: 12px;
+}
+
+* { box-sizing: border-box; margin:0; padding:0; }
+
+body {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #0c0c0c, #111827);
+  overflow: hidden;
+  color: var(--text-light);
+}
+
+/* WATCH CONTAINER */
+.watch {
+  width: 420px;
+  height: 540px;
+  border-radius: 35px;
+  background: linear-gradient(145deg, #111, #1f1f1f);
+  box-shadow: 0 0 40px rgba(0,255,255,0.2), inset 0 0 20px rgba(255,255,255,0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 25px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* TABS */
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.tab {
+  padding: 12px 22px;
+  border-radius: 25px;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(var(--glass-blur));
+  cursor: pointer;
+  font-size: 0.95em;
+  color: var(--text-light);
+  font-weight: 500;
+  transition: all 0.4s ease;
+  box-shadow: 0 0 8px rgba(0,255,255,0.2);
+}
+.tab:hover {
+  background: var(--accent-blue);
+  box-shadow: 0 0 18px var(--accent-blue);
+}
+.tab.active {
+  background: var(--accent-blue);
+  box-shadow: 0 0 25px var(--accent-blue);
+}
+
+/* WINDOW PANELS */
+.window {
+  display: none;
+  width: 100%;
+  text-align: center;
+  transition: all 0.5s ease;
+  padding: 15px;
+  border-radius: 20px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  box-shadow: inset 0 0 20px rgba(0,255,255,0.1);
+}
+.window.active {
+  display: block;
+}
+
+/* DIGITAL DISPLAY */
+.display {
+  font-family: 'Orbitron', monospace;
+  font-size: 3em;
+  color: var(--glow);
+  text-shadow: 0 0 15px var(--glow), 0 0 30px var(--glow);
+  margin: 20px 0;
+}
+
+/* TYRES */
+.tyres {
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+  align-items: center;
+  margin: 20px 0;
+}
+.tyre {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, #222 40%, #000 100%);
+  border: 10px solid #111;
+  box-shadow: 0 0 25px #00ffe0, inset 0 0 18px #007b8c;
+  position: relative;
+  animation: spin 2s linear infinite;
+}
+.tyre::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  background: var(--glow);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 20px var(--glow);
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* MOTIVATION TEXT */
+.motivation {
+  font-style: italic;
+  color: var(--accent-green);
+  font-size: 1.15em;
+  text-shadow: 0 0 12px var(--accent-green);
+  margin-top: 15px;
+  animation: fadeIn 4s ease infinite alternate;
+}
+@keyframes fadeIn {
+  from { opacity: 0.6; }
+  to { opacity: 1; }
+}
+
+/* BUTTONS AND FILE INPUT */
+button, input[type="file"] {
+  background: linear-gradient(145deg, #1a1a1a, #0e0e0e);
+  border: none;
+  border-radius: 25px;
+  padding: 12px 22px;
+  color: var(--text-light);
+  font-size: 0.95em;
+  cursor: pointer;
+  box-shadow: 0 0 15px rgba(0,255,255,0.3);
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+button:hover, input[type="file"]:hover {
+  background: var(--accent-blue);
+  color: #fff;
+  box-shadow: 0 0 25px var(--accent-blue);
+}
+
+/* TIMER CONTROLS */
+.timer-controls {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+/* STATS PANEL */
+.stats-box {
+  background: rgba(0,0,0,0.3);
+  border-radius: 18px;
+  padding: 15px;
+  font-size: 1em;
+  margin-top: 12px;
+  box-shadow: inset 0 0 12px rgba(0,255,255,0.2);
+}
+</style>
+</head>
+<body>
+
+<div class="watch">
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab active" id="tabClock" onclick="switchTab('clock')">🕒 Clock</div>
+    <div class="tab" id="tabTimer" onclick="switchTab('timer')">⏱ Timer</div>
+    <div class="tab" id="tabStats" onclick="switchTab('stats')">🚴 Stats</div>
+  </div>
+
+  <!-- CLOCK WINDOW -->
+  <div class="window active" id="clockWindow">
+    <div class="display" id="clockDisplay">00:00:00</div>
+    <div class="tyres"><div class="tyre"></div><div class="tyre"></div></div>
+    <div class="motivation" id="motivation">Keep pushing forward</div>
+  </div>
+
+  <!-- TIMER WINDOW -->
+  <div class="window" id="timerWindow">
+    <div class="display" id="timerDisplay">00:00:00</div>
+    <div class="tyres"><div class="tyre"></div><div class="tyre"></div></div>
+    <div class="timer-controls">
+      <button onclick="startTimer()">Start</button>
+      <button onclick="stopTimer()">Stop</button>
+      <button onclick="resetTimer()">Reset</button>
+    </div>
+  </div>
+
+  <!-- STATS WINDOW -->
+  <div class="window" id="statsWindow">
+    <div class="stats-box" id="statsBox">
+      Distance: 0 km<br>
+      Duration: 0 hrs<br>
+      Avg Speed: 0 km/h
+    </div>
+    <input type="file" id="gpxFile" accept=".gpx" style="margin-top:15px;">
+    <button onclick="toggleSound()">🔊 Tyre Sound</button>
+  </div>
+</div>
+
+<!-- AUDIO -->
+<audio id="tyreSound" loop>
+  <source src="https://actions.google.com/sounds/v1/transportation/bicycle_pedaling.ogg" type="audio/ogg">
+  <source src="https://actions.google.com/sounds/v1/transportation/bicycle_pedaling.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+/* CLOCK */
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, '0');
+  const m = String(now.getMinutes()).padStart(2, '0');
+  const s = String(now.getSeconds()).padStart(2, '0');
+  document.getElementById('clockDisplay').innerText = `${h}:${m}:${s}`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+/* MOTIVATION TEXT */
+const messages = [
+  "Keep pushing forward",
+  "Ride your time",
+  "Every mile is progress",
+  "Stay smooth, stay strong",
+  "The road is yours",
+  "Pedal with purpose",
+  "Your journey, your speed",
+  "Spin, smile, repeat",
+  "Chase horizons, not time",
+  "Wheels turn, dreams burn"
+];
+let msgIndex = 0;
+setInterval(()=>{
+  msgIndex = (msgIndex+1) % messages.length;
+  document.getElementById('motivation').innerText = messages[msgIndex];
+}, 5000);
+
+/* TABS */
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.window').forEach(w=>w.classList.remove('active'));
+  document.getElementById('tab'+tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+  document.getElementById(tab+'Window').classList.add('active');
+}
+
+/* TIMER */
+let timerInterval, totalSeconds = 0;
+function updateTimerDisplay(){
+  const h = String(Math.floor(totalSeconds/3600)).padStart(2,'0');
+  const m = String(Math.floor((totalSeconds%3600)/60)).padStart(2,'0');
+  const s = String(totalSeconds%60).padStart(2,'0');
+  document.getElementById('timerDisplay').innerText = `${h}:${m}:${s}`;
+}
+function startTimer(){
+  if(timerInterval) return;
+  timerInterval = setInterval(()=>{
+    totalSeconds++;
+    updateTimerDisplay();
+  },1000);
+}
+function stopTimer(){
+  clearInterval(timerInterval);
+  timerInterval = null;
+}
+function resetTimer(){
+  stopTimer();
+  totalSeconds=0;
+  updateTimerDisplay();
+}
+
+/* GPX PARSING */
+document.getElementById('gpxFile').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(ev.target.result,"text/xml");
+    const trkpts = xml.getElementsByTagName("trkpt");
+    let distance = 0;
+    let prevLat, prevLon;
+    for(let i=0;i<trkpts.length;i++){
+      const lat = parseFloat(trkpts[i].getAttribute("lat"));
+      const lon = parseFloat(trkpts[i].getAttribute("lon"));
+      if(prevLat!==undefined){
+        distance += getDistanceFromLatLonInKm(prevLat, prevLon, lat, lon);
+      }
+      prevLat=lat; prevLon=lon;
+    }
+    const durationH = (trkpts.length>1) ? (trkpts.length/60).toFixed(2) : 0;
+    const speed = durationH>0 ? (distance/durationH).toFixed(2) : 0;
+    document.getElementById('statsBox').innerHTML = `Distance: ${distance.toFixed(2)} km<br>Duration: ${durationH} hrs<br>Avg Speed: ${speed} km/h`;
+    // Optionally adjust tyre spin by speed:
+    setWheelSpeed(speed);
+  };
+  reader.readAsText(file);
+});
+
+/* HELPER: DISTANCE BETWEEN GPS POINTS */
+function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2){
+  const R = 6371;
+  const dLat = (lat2-lat1)*Math.PI/180;
+  const dLon = (lon2-lon1)*Math.PI/180;
+  const a = Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
+  const c = 2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+  return R*c;
+}
+
+/* TYRE SOUND */
+let soundPlaying = false;
+function toggleSound(){
+  const audio = document.getElementById('tyreSound');
+  if(!soundPlaying){ audio.play(); soundPlaying = true; }
+  else { audio.pause(); soundPlaying = false; }
+}
+
+/* DYNAMIC TYRE SPIN BASED ON SPEED */
+function setWheelSpeed(kmh){
+  const wheels = document.querySelectorAll('.tyre');
+  const speed = Math.max(0.5, 5/(kmh||1)); // duration in seconds
+  wheels.forEach(wheel => wheel.style.animationDuration = `${speed}s`);
+}
+</script>
+</body>
+</html>
